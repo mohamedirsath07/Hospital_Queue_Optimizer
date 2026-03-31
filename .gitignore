@@ -1,0 +1,24 @@
+# Environment variables (contains secrets)
+.env
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Node modules
+node_modules/
+.vite/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

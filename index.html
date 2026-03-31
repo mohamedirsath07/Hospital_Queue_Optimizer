@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Triage Assistant | Smart Patient Prioritization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b1220;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --bg-elevated: #1f2937;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-blue: #3b82f6;
+            --accent-blue-glow: rgba(59, 130, 246, 0.4);
+            --critical: #ef4444;
+            --critical-glow: rgba(239, 68, 68, 0.5);
+            --high: #f97316;
+            --high-glow: rgba(249, 115, 22, 0.4);
+            --medium: #eab308;
+            --medium-glow: rgba(234, 179, 8, 0.4);
+            --low: #22c55e;
+            --low-glow: rgba(34, 197, 94, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 18, 32, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 15px var(--accent-blue-glow);
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .header-title p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent-blue);
+        }
+
+        .header-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--low);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Container */
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px 100px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Input Section */
+        .input-section {
+            position: relative;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .input-label-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .input-label h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-label p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        .symptoms-textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .symptoms-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-glow);
+        }
+
+        .symptoms-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 12px;
+            right: 14px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Analyze Button */
+        .btn-analyze {
+            width: 100%;
+            padding: 18px 24px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px var(--accent-blue-glow);
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--accent-blue-glow);
+        }
+
+        .btn-analyze:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-analyze svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Scenarios Section */
+        .scenarios-section {
+            margin-top: 8px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .scenario-card {
+            padding: 20px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .scenario-card:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .scenario-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .scenario-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .scenario-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 18, 32, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 56px;
+            height: 56px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Priority Card */
+        .priority-card {
+            position: relative;
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .priority-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-xl);
+            padding: 2px;
+            background: linear-gradient(135deg, var(--priority-color, var(--accent-blue)), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .priority-card.critical {
+            --priority-color: var(--critical);
+            box-shadow: 0 0 60px var(--critical-glow), inset 0 1px 0 rgba(239, 68, 68, 0.1);
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-secondary) 100%);
+        }
+
+        .priority-card.high {
+            --priority-color: var(--high);
+            box-shadow: 0 0 40px var(--high-glow), inset 0 1px 0 rgba(249, 115, 22, 0.1);
+            background: linear-gradient(180deg, rgba(249, 115, 22, 0.08) 0%, var(--bg-secondary) 100%);
+        }
+
+        .priority-card.medium {
+            --priority-color: var(--medium);
+            box-shadow: 0 0 40px var(--medium-glow), inset 0 1px 0 rgba(234, 179, 8, 0.1);
+            background: linear-gradient(180deg, rgba(234, 179, 8, 0.08) 0%, var(--bg-secondary) 100%);
+        }
+
+        .priority-card.low {
+            --priority-color: var(--low);
+            box-shadow: 0 0 30px var(--low-glow), inset 0 1px 0 rgba(34, 197, 94, 0.1);
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, var(--bg-secondary) 100%);
+        }
+
+        .priority-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+        }
+
+        .priority-level {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .priority-card.critical .priority-level { color: var(--critical); }
+        .priority-card.high .priority-level { color: var(--high); }
+        .priority-card.medium .priority-level { color: var(--medium); }
+        .priority-card.low .priority-level { color: var(--low); }
+
+        .priority-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .info-card-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .info-card-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card-content {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .info-card-content ul {
+            list-style: none;
+            margin-top: 8px;
+        }
+
+        .info-card-content li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .info-card-content li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+        }
+
+        /* Hospitals Section */
+        .hospitals-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .hospitals-card.emergency {
+            border-color: rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+
+        .hospitals-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hospitals-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--critical) 0%, #dc2626 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 15px var(--critical-glow);
+        }
+
+        .hospitals-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .hospitals-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .hospital-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hospital-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .hospital-item:hover {
+            background: var(--bg-elevated);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .hospital-item.best-match {
+            border-color: rgba(34, 197, 94, 0.4);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, var(--bg-card) 100%);
+        }
+
+        .hospital-rank {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .hospital-item.best-match .hospital-rank {
+            background: var(--low);
+            color: white;
+        }
+
+        .hospital-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hospital-name-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .hospital-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .hospital-tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-best { background: var(--low); color: white; }
+        .tag-closest { background: var(--critical); color: white; }
+        .tag-verified { background: var(--accent-blue); color: white; }
+
+        .hospital-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .hospital-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-navigate {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-navigate:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-call {
+            background: var(--low);
+            color: white;
+        }
+
+        .btn-call:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+        }
+
+        .btn-call.disabled {
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-call.disabled:hover {
+            transform: none;
+        }
+
+        .hospitals-footer {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .hospitals-footer svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-blue);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Safety Warning */
+        .safety-warning {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            border-radius: var(--radius-sm);
+        }
+
+        .safety-warning svg {
+            width: 20px;
+            height: 20px;
+            color: var(--medium);
+            flex-shrink: 0;
+        }
+
+        .safety-warning span {
+            font-size: 0.85rem;
+            color: var(--medium);
+        }
+
+        /* New Analysis Button */
+        .btn-new-analysis {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-new-analysis:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-text strong {
+            color: var(--text-secondary);
+        }
+
+        /* Server Status */
+        .server-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            z-index: 50;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--low);
+            animation: pulse 2s infinite;
+        }
+
+        .server-status.offline .status-dot {
+            background: var(--critical);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-badge {
+                align-self: flex-start;
+            }
+
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hospital-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hospital-actions {
+                width: 100%;
+                margin-top: 12px;
+            }
+
+            .btn-action {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .priority-card {
+                padding: 30px 20px;
+            }
+
+            .priority-level {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main {
+                padding: 20px 16px 80px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .hospital-name-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">🏥</div>
+                <div class="header-title">
+                    <h1>AI Triage Assistant</h1>
+                    <p>Smart patient prioritization system</p>
+                </div>
+            </div>
+            <div class="header-badge">
+                AI-Assisted • Not a Doctor
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Input Section -->
+        <section class="card input-section">
+            <div class="input-label">
+                <div class="input-label-icon">📋</div>
+                <div>
+                    <h2>Describe Patient Symptoms</h2>
+                    <p>Enter detailed symptoms for accurate assessment</p>
+                </div>
+            </div>
+            <div class="textarea-wrapper">
+                <textarea 
+                    class="symptoms-textarea" 
+                    id="symptoms"
+                    placeholder="Describe symptoms in detail (e.g., severe chest pain radiating to left arm, shortness of breath, cold sweats, started 20 minutes ago...)"
+                    maxlength="1000"
+                ></textarea>
+                <span class="char-count"><span id="charCount">0</span>/1000</span>
+            </div>
+            <button class="btn-analyze" id="analyzeBtn" onclick="analyzeSymptoms()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Analyze Symptoms
+            </button>
+        </section>
+
+        <!-- Quick Scenarios -->
+        <section class="card scenarios-section">
+            <div class="section-label">Quick Test Scenarios</div>
+            <div class="scenarios-grid">
+                <div class="scenario-card" onclick="fillScenario('critical')">
+                    <span class="scenario-icon">🚨</span>
+                    <div class="scenario-title">Chest Pain Emergency</div>
+                    <div class="scenario-desc">Radiating pain, breathlessness</div>
+                </div>
+                <div class="scenario-card" onclick="fillScenario('high')">
+                    <span class="scenario-icon">🤒</span>
+                    <div class="scenario-title">High Fever (2 Days)</div>
+                    <div class="scenario-desc">103°F, body aches, chills</div>
+                </div>
+                <div class="scenario-card" onclick="fillScenario('low')">
+                    <span class="scenario-icon">🤕</span>
+                    <div class="scenario-title">Minor Headache</div>
+                    <div class="scenario-desc">Mild discomfort, no other symptoms</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="results">
+            <!-- Priority Card -->
+            <div class="priority-card" id="priorityCard">
+                <div class="priority-icon" id="priorityIcon">🚨</div>
+                <div class="priority-level" id="priorityLevel">CRITICAL</div>
+                <div class="priority-subtitle" id="prioritySubtitle">Immediate Attention Required</div>
+                <div class="priority-badge" id="priorityBadge">
+                    <span>🕐</span>
+                    <span id="queueText">Critical Care Queue</span>
+                </div>
+            </div>
+
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="info-card-icon">❓</div>
+                        <div class="info-card-title">Why This Priority</div>
+                    </div>
+                    <div class="info-card-content" id="reasonContent">
+                        Severe chest pain with radiation, shortness of breath, and cold sweats
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="info-card-icon">⚡</div>
+                        <div class="info-card-title">Recommended Action</div>
+                    </div>
+                    <div class="info-card-content" id="actionContent">
+                        Call emergency services immediately and prepare for rapid transport
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escalation Triggers -->
+            <div class="info-card" id="escalationCard" style="margin-bottom: 20px;">
+                <div class="info-card-header">
+                    <div class="info-card-icon">⚠️</div>
+                    <div class="info-card-title">Watch For These Signs</div>
+                </div>
+                <div class="info-card-content">
+                    <ul id="escalationList"></ul>
+                </div>
+            </div>
+
+            <!-- Hospitals Section -->
+            <div class="hospitals-card" id="hospitalsCard">
+                <div class="hospitals-header">
+                    <div class="hospitals-icon">🏥</div>
+                    <div>
+                        <div class="hospitals-title">Emergency Help Nearby</div>
+                        <div class="hospitals-subtitle">Hospitals sorted by relevance & distance</div>
+                    </div>
+                </div>
+                
+                <div id="safetyWarning" class="safety-warning" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span id="safetyText"></span>
+                </div>
+
+                <div class="hospital-list" id="hospitalList">
+                    <!-- Hospitals inserted here -->
+                </div>
+
+                <div class="hospitals-footer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4m0-4h.01"/>
+                    </svg>
+                    <span>Always confirm availability with the hospital. In life-threatening emergencies, call <strong>108</strong> or <strong>112</strong> immediately.</span>
+                </div>
+            </div>
+
+            <!-- New Analysis -->
+            <button class="btn-new-analysis" onclick="resetForm()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Start New Analysis
+            </button>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">
+                <strong>AI Triage Assistant</strong> — Designed to prevent delays in critical care<br>
+                This is a decision support tool, not a replacement for medical professionals.
+            </p>
+        </footer>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Analyzing patient condition...</div>
+        <div class="loading-subtext">This may take a few seconds</div>
+    </div>
+
+    <!-- Server Status -->
+    <div class="server-status" id="serverStatus">
+        <div class="status-dot"></div>
+        <span>System Online</span>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let userLocation = null;
+        let currentSymptoms = '';
+
+        // Priority configurations
+        const priorityConfig = {
+            1: { 
+                level: 'CRITICAL',
+                icon: '🚨',
+                subtitle: 'Immediate Attention Required',
+                class: 'critical',
+                queue: 'Critical Care Queue'
+            },
+            2: { 
+                level: 'HIGH PRIORITY',
+                icon: '⚠️',
+                subtitle: 'Needs Prompt Medical Attention',
+                class: 'high',
+                queue: 'Urgent Care Queue'
+            },
+            3: { 
+                level: 'MODERATE',
+                icon: '🔶',
+                subtitle: 'Standard Medical Evaluation',
+                class: 'medium',
+                queue: 'Standard Care Queue'
+            },
+            4: { 
+                level: 'LOW PRIORITY',
+                icon: '✅',
+                subtitle: 'Can Wait Safely',
+                class: 'low',
+                queue: 'Routine Care Queue'
+            }
+        };
+
+        // Scenario templates
+        const scenarios = {
+            critical: "Severe crushing chest pain radiating to left arm, shortness of breath, cold sweats, feeling of impending doom. Started 20 minutes ago. Patient appears pale and anxious.",
+            high: "High fever of 103°F for the past 2 days, severe body aches, chills, and fatigue. No improvement with over-the-counter medication. Difficulty keeping fluids down.",
+            low: "Mild headache for the past few hours. No other symptoms. Able to carry out daily activities normally. No sensitivity to light."
+        };
+
+        // Character counter
+        document.getElementById('symptoms').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        function fillScenario(type) {
+            const textarea = document.getElementById('symptoms');
+            textarea.value = scenarios[type];
+            document.getElementById('charCount').textContent = scenarios[type].length;
+            textarea.focus();
+        }
+
+        async function analyzeSymptoms() {
+            const symptoms = document.getElementById('symptoms').value.trim();
+            
+            if (!symptoms) {
+                alert('Please describe the symptoms');
+                return;
+            }
+
+            currentSymptoms = symptoms;
+
+            // Show loading
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('analyzeBtn').disabled = true;
+
+            try {
+                // Analyze symptoms
+                const response = await fetch(`${API_URL}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symptoms })
+                });
+
+                if (!response.ok) throw new Error('Analysis failed');
+
+                const data = await response.json();
+                displayResult(data);
+
+                // Find nearby hospitals
+                await findNearbyHospitals();
+
+                // Scroll to results
+                setTimeout(() => {
+                    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('active');
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        function displayResult(data) {
+            const config = priorityConfig[data.priority] || priorityConfig[3];
+
+            // Priority card
+            const priorityCard = document.getElementById('priorityCard');
+            priorityCard.className = `priority-card ${config.class}`;
+            
+            document.getElementById('priorityIcon').textContent = config.icon;
+            document.getElementById('priorityLevel').textContent = config.level;
+            document.getElementById('prioritySubtitle').textContent = config.subtitle;
+            document.getElementById('queueText').textContent = config.queue;
+
+            // Info content
+            document.getElementById('reasonContent').textContent = data.reason;
+            document.getElementById('actionContent').textContent = data.action;
+
+            // Escalation triggers
+            const escalationCard = document.getElementById('escalationCard');
+            const escalationList = document.getElementById('escalationList');
+            
+            if (data.escalation_triggers && data.escalation_triggers.length > 0) {
+                escalationList.innerHTML = data.escalation_triggers
+                    .map(trigger => `<li>${trigger}</li>`)
+                    .join('');
+                escalationCard.style.display = 'block';
+            } else {
+                escalationCard.style.display = 'none';
+            }
+
+            // Update hospitals card styling based on priority
+            const hospitalsCard = document.getElementById('hospitalsCard');
+            if (data.priority === 1) {
+                hospitalsCard.classList.add('emergency');
+            } else {
+                hospitalsCard.classList.remove('emergency');
+            }
+
+            document.getElementById('results').classList.add('active');
+        }
+
+        async function findNearbyHospitals() {
+            const hospitalList = document.getElementById('hospitalList');
+            
+            hospitalList.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                    <div class="loading-spinner" style="width: 32px; height: 32px; margin: 0 auto 12px;"></div>
+                    Detecting location...
+                </div>
+            `;
+
+            try {
+                const position = await getCurrentPosition();
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                const response = await fetch(`${API_URL}/nearby-hospitals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lat: userLocation.lat,
+                        lng: userLocation.lng,
+                        symptoms: currentSymptoms
+                    })
+                });
+
+                const data = await response.json();
+
+                // Safety warning
+                const safetyWarning = document.getElementById('safetyWarning');
+                if (data.safety_message) {
+                    document.getElementById('safetyText').textContent = data.safety_message;
+                    safetyWarning.style.display = 'flex';
+                } else {
+                    safetyWarning.style.display = 'none';
+                }
+
+                if (data.success && data.hospitals && data.hospitals.length > 0) {
+                    displayHospitals(data.hospitals);
+                } else {
+                    hospitalList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div style="font-size: 2rem; margin-bottom: 12px;">📍</div>
+                            <p>${data.error || 'No hospitals found nearby'}</p>
+                            <p style="margin-top: 12px; font-size: 0.85rem;">
+                                Emergency services: <strong style="color: var(--critical);">108</strong> or <strong style="color: var(--critical);">112</strong>
+                            </p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Location error:', error);
+                hospitalList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">📍</div>
+                        <p>Location access required</p>
+                        <p style="margin-top: 8px; font-size: 0.85rem;">
+                            Enable location services to find nearby hospitals
+                        </p>
+                        <p style="margin-top: 12px; font-size: 0.85rem;">
+                            Emergency: <strong style="color: var(--critical);">108</strong> / <strong style="color: var(--critical);">112</strong>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayHospitals(hospitals) {
+            const hospitalList = document.getElementById('hospitalList');
+            
+            hospitalList.innerHTML = hospitals.map((hospital, index) => {
+                const isBestMatch = hospital.match_tag === 'Best Match';
+                const isFirst = index === 0;
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}`;
+                
+                let tags = '';
+                if (isBestMatch) tags += '<span class="tag tag-best">BEST MATCH</span>';
+                if (isFirst) tags += '<span class="tag tag-closest">CLOSEST</span>';
+                tags += '<span class="tag tag-verified">VERIFIED</span>';
+
+                const callBtn = hospital.phone 
+                    ? `<a href="tel:${hospital.phone.replace(/\s/g, '')}" class="btn-action btn-call">📞 Call</a>`
+                    : `<span class="btn-action btn-call disabled">📞 Call</span>`;
+                
+                return `
+                    <div class="hospital-item ${isBestMatch ? 'best-match' : ''}">
+                        <div class="hospital-rank">${index + 1}</div>
+                        <div class="hospital-info">
+                            <div class="hospital-name-row">
+                                <span class="hospital-name">${hospital.name}</span>
+                                <div class="hospital-tags">${tags}</div>
+                            </div>
+                            <div class="hospital-meta">${hospital.distance_text} away • ${hospital.address}</div>
+                        </div>
+                        <div class="hospital-actions">
+                            <a href="${directionsUrl}" target="_blank" class="btn-action btn-navigate">📍 Navigate</a>
+                            ${callBtn}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not supported'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                });
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('symptoms').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('hospitalList').innerHTML = '';
+            document.getElementById('safetyWarning').style.display = 'none';
+            currentSymptoms = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Server status check
+        async function checkServerStatus() {
+            const statusEl = document.getElementById('serverStatus');
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (response.ok) {
+                    statusEl.classList.remove('offline');
+                    statusEl.querySelector('span').textContent = 'System Online';
+                } else {
+                    statusEl.classList.add('offline');
+                    statusEl.querySelector('span').textContent = 'System Offline';
+                }
+            } catch {
+                statusEl.classList.add('offline');
+                statusEl.querySelector('span').textContent = 'System Offline';
+            }
+        }
+
+        checkServerStatus();
+        setInterval(checkServerStatus, 30000);
+
+        // Ctrl+Enter to submit
+        document.getElementById('symptoms').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                analyzeSymptoms();
+            }
+        });
+    </script>
+</body>
+</html>
