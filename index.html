@@ -1173,7 +1173,10 @@
   // ── Main triage flow ──────────────────────────────────────────────
   async function runTriage() {
     const symptoms = document.getElementById('symptom-input').value.trim();
-    if (symptoms.length < 10) return;
+    if (symptoms.length < 10) {
+      showError('Please describe your symptoms in at least 10 characters');
+      return;
+    }
 
     // Validation
     const blocked = ['diagnose', 'prescribe', 'prescription', 'medicine name', 'which drug'];
@@ -1195,7 +1198,12 @@
         body: JSON.stringify({ symptoms })
       });
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMsg = errorData.detail || errorData.error || `Server error (${res.status})`;
+        throw new Error(errorMsg);
+      }
+
       const data = await res.json();
       const elapsed = Date.now() - startTime;
 
@@ -1204,8 +1212,18 @@
 
     } catch (err) {
       showLoading(false);
-      showError('Unable to reach the triage server. Please check your connection and try again.');
-      console.error(err);
+
+      let userMessage = 'Unable to complete analysis. ';
+      if (err.message.includes('Failed to fetch')) {
+        userMessage += 'Check your internet connection.';
+      } else if (err.message.includes('timeout')) {
+        userMessage += 'The server is taking too long to respond. Please try again.';
+      } else {
+        userMessage += err.message || 'Please check your connection and try again.';
+      }
+
+      showError(userMessage, 'AI Analysis');
+      console.error('Triage error:', err);
     }
   }
 
@@ -1231,7 +1249,16 @@
 
   // ── Render result ─────────────────────────────────────────────────
   function renderResult(data, elapsed) {
-    const level = (data.priority || 'MEDIUM').toUpperCase();
+    // Convert priority integer (1-4) to level string
+    // Backend returns: 1=CRITICAL, 2=URGENT, 3=SEMI-URGENT, 4=NON-URGENT
+    // Frontend expects: CRITICAL, HIGH, MEDIUM, LOW
+    const priorityMap = {
+      1: 'CRITICAL',
+      2: 'HIGH',
+      3: 'MEDIUM',
+      4: 'LOW'
+    };
+    const level = priorityMap[data.priority] || 'MEDIUM';
     const levelLower = level.toLowerCase();
 
     const icons = { CRITICAL: '🚨', HIGH: '⚠️', MEDIUM: '⏳', LOW: '✅' };
@@ -1255,17 +1282,19 @@
     document.getElementById('action-text').textContent = data.action || 'Please consult a healthcare professional.';
     document.getElementById('queue-text').textContent = data.queue || queueText[level];
 
-    // Confidence
-    renderConfidence(data.confidence || 'moderate', level);
+    // Confidence: convert float (0.0-1.0) to string ('high', 'moderate', 'low')
+    const confidenceValue = convertConfidenceToString(data.confidence);
+    renderConfidence(confidenceValue, level);
 
     // Action buttons
     const btns = document.getElementById('action-btns');
     btns.innerHTML = '';
+    const conditionType = (data.condition_category || 'general').toLowerCase();
     if (level === 'CRITICAL' || level === 'HIGH') {
-      btns.innerHTML += `<button class="action-chip primary" onclick="findHospitals('${levelLower}', '${data.condition_type || 'general'}')">📍 Find Nearest Hospital</button>`;
+      btns.innerHTML += `<button class="action-chip primary" onclick="findHospitals('${levelLower}', '${conditionType}')">📍 Find Nearest Hospital</button>`;
       btns.innerHTML += `<a class="action-chip" href="tel:108">📞 Call 108 (Emergency)</a>`;
     } else {
-      btns.innerHTML += `<button class="action-chip" onclick="findHospitals('${levelLower}', '${data.condition_type || 'general'}')">📍 Find Nearby Clinic</button>`;
+      btns.innerHTML += `<button class="action-chip" onclick="findHospitals('${levelLower}', '${conditionType}')">📍 Find Nearby Clinic</button>`;
     }
     btns.innerHTML += `<button class="action-chip" onclick="resetAll()">↩ New Assessment</button>`;
 
@@ -1276,8 +1305,17 @@
 
     // Auto-find hospitals for critical
     if (level === 'CRITICAL') {
-      setTimeout(() => findHospitals(levelLower, data.condition_type || 'general'), 800);
+      setTimeout(() => findHospitals(levelLower, conditionType), 800);
     }
+  }
+
+  // Convert confidence float (0.0-1.0) to string label
+  function convertConfidenceToString(confidence) {
+    if (typeof confidence === 'string') return confidence; // Already a string
+    const num = parseFloat(confidence) || 0.5;
+    if (num >= 0.75) return 'high';
+    if (num >= 0.4) return 'moderate';
+    return 'low';
   }
 
   function renderConfidence(conf, level) {
@@ -1428,10 +1466,27 @@
     document.getElementById('location-fallback').classList.remove('visible');
   }
 
-  function showError(msg) {
+  function showError(msg, step = null) {
     const el = document.getElementById('error-card');
-    el.textContent = '⚠️ ' + msg;
+    let fullMessage = '⚠️ ' + msg;
+
+    if (step) {
+      fullMessage += ` (Step: ${step})`;
+    }
+
+    el.innerHTML = `
+      <div style="margin-bottom: 10px;">${fullMessage}</div>
+      <div style="font-size: 12px; color: var(--muted); line-height: 1.5;">
+        <strong>Next steps:</strong>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+          <li>Check your internet connection</li>
+          <li>Try again in a few moments</li>
+          <li>If the issue persists, please contact support</li>
+        </ul>
+      </div>
+    `;
     el.classList.add('visible');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function resetAll() {
