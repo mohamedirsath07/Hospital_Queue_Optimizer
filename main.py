@@ -311,6 +311,15 @@ app = FastAPI(
     description="AI-powered medical triage system with smart hospital recommendations"
 )
 
+# Add CORS middleware FIRST (applies outermost)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Apply rate limiter as middleware
 app.state.limiter = limiter
 
@@ -322,14 +331,6 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
         "detail": str(exc.detail),
         "status": 429
     }
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-)
 
 PRIORITY_LABELS = {
     1: "CRITICAL",
