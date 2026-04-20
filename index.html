@@ -126,6 +126,171 @@
             animation: pulse 2s infinite;
         }
 
+        /* About Button */
+        .btn-about {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-about:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-about svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-about-text {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .btn-about-text {
+                display: inline;
+            }
+            .btn-about svg {
+                display: none;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .modal-section p,
+        .modal-section ol {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-section ol {
+            margin-left: 20px;
+        }
+
+        .modal-section li {
+            margin-bottom: 8px;
+        }
+
+        .btn-modal-close {
+            width: 100%;
+            padding: 14px 24px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--accent-blue-glow);
+        }
+
+        /* Screen reader only class */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -896,11 +1061,53 @@
                     <p>Smart patient prioritization system</p>
                 </div>
             </div>
-            <div class="header-badge">
+            <button class="btn-about" id="aboutBtn" aria-label="Learn about this application" title="About this app">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4m0-4h.01"></path>
+                </svg>
+                <span class="btn-about-text">About</span>
+            </button>
+            <div class="header-badge" aria-label="This is an AI assistant, not a doctor">
                 AI-Assisted • Not a Doctor
             </div>
         </div>
     </header>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal" role="dialog" aria-labelledby="aboutTitle" aria-hidden="true">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAbout()" aria-label="Close about dialog">&times;</button>
+            <h2 id="aboutTitle" class="modal-title">About AI Hospital Triage System</h2>
+
+            <div class="modal-section">
+                <h3>What is this?</h3>
+                <p>An intelligent medical decision support tool that uses AI to help prioritize patient care and find nearby hospitals.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>How does it work?</h3>
+                <ol>
+                    <li>Describe symptoms in detail</li>
+                    <li>AI analyzes and assigns urgency level (Critical, Urgent, Semi-Urgent, Non-Urgent)</li>
+                    <li>View hospital recommendations nearby</li>
+                    <li>Navigate or call hospitals directly</li>
+                </ol>
+            </div>
+
+            <div class="modal-section">
+                <h3>Technology</h3>
+                <p><strong>Backend:</strong> FastAPI • <strong>AI:</strong> Llama 3.3 70B • <strong>Maps:</strong> Google Places</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>⚠️ Important Disclaimer</h3>
+                <p><strong>This is NOT a replacement for professional medical advice.</strong> This system is a decision support tool for educational purposes. Always consult qualified healthcare professionals. In emergencies, call emergency services immediately (108/112).</p>
+            </div>
+
+            <button class="btn-modal-close" onclick="closeAbout()">Got It</button>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main">
@@ -914,16 +1121,19 @@
                 </div>
             </div>
             <div class="textarea-wrapper">
-                <textarea 
-                    class="symptoms-textarea" 
+                <label for="symptoms" class="sr-only">Patient symptoms textarea</label>
+                <textarea
+                    class="symptoms-textarea"
                     id="symptoms"
                     placeholder="Describe symptoms in detail (e.g., severe chest pain radiating to left arm, shortness of breath, cold sweats, started 20 minutes ago...)"
                     maxlength="1000"
+                    aria-label="Describe patient symptoms in detail"
+                    aria-describedby="charCount"
                 ></textarea>
-                <span class="char-count"><span id="charCount">0</span>/1000</span>
+                <span class="char-count" id="charCount"><span id="charCountNum">0</span>/1000 characters</span>
             </div>
-            <button class="btn-analyze" id="analyzeBtn" onclick="analyzeSymptoms()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="btn-analyze" id="analyzeBtn" onclick="analyzeSymptoms()" aria-label="Analyze entered symptoms">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 Analyze Symptoms
@@ -953,7 +1163,7 @@
         </section>
 
         <!-- Results Section -->
-        <section class="results-section" id="results">
+        <section class="results-section" id="results" role="region" aria-label="Analysis results" aria-live="polite" aria-atomic="false">
             <!-- Priority Card -->
             <div class="priority-card" id="priorityCard">
                 <div class="priority-icon" id="priorityIcon">🚨</div>
@@ -1105,13 +1315,40 @@
 
         // Character counter
         document.getElementById('symptoms').addEventListener('input', function() {
-            document.getElementById('charCount').textContent = this.value.length;
+            document.getElementById('charCountNum').textContent = this.value.length;
+        });
+
+        // About Modal Functions
+        document.getElementById('aboutBtn').addEventListener('click', function() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+        });
+
+        function closeAbout() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('aboutModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAbout();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAbout();
+            }
         });
 
         function fillScenario(type) {
             const textarea = document.getElementById('symptoms');
             textarea.value = scenarios[type];
-            document.getElementById('charCount').textContent = scenarios[type].length;
+            document.getElementById('charCountNum').textContent = scenarios[type].length;
             textarea.focus();
         }
 
