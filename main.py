@@ -10,6 +10,7 @@ import json
 import math
 from pathlib import Path
 from typing import Optional
+from datetime import datetime
 
 # Load .env file if exists
 env_file = Path(__file__).parent / ".env"
@@ -19,15 +20,23 @@ if env_file.exists():
             key, val = line.split("=", 1)
             os.environ.setdefault(key.strip(), val.strip())
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel
 import httpx
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # =============================================================================
-# CONFIGURATION
+# VERSION AND CONFIGURATION
 # =============================================================================
+
+APP_VERSION = "1.1.0"
+APP_NAME = "AI Hospital Triage System"
+START_TIME = datetime.now()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 if not GROQ_API_KEY:
@@ -290,10 +299,29 @@ Respond with ONLY valid JSON:
 }"""
 
 # =============================================================================
-# FASTAPI APP
+# FASTAPI APP & RATE LIMITING
 # =============================================================================
 
-app = FastAPI(title="AI Triage System")
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
+app = FastAPI(
+    title=APP_NAME,
+    version=APP_VERSION,
+    description="AI-powered medical triage system with smart hospital recommendations"
+)
+
+# Apply rate limiter as middleware
+app.state.limiter = limiter
+
+# Custom exception handler for rate limit exceeded
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return {
+        "error": "Rate limit exceeded",
+        "detail": str(exc.detail),
+        "status": 429
+    }
 
 app.add_middleware(
     CORSMiddleware,
@@ -320,12 +348,38 @@ async def root():
     return {"message": "AI Triage API", "endpoints": ["/analyze", "/health", "/nearby-hospitals"]}
 
 @app.get("/health")
-async def health():
-    """Health check."""
-    return {"status": "ok", "model": GROQ_MODEL}
+@limiter.limit("100/minute")
+async def health(request: Request):
+    """
+    Comprehensive health check endpoint.
+
+    Returns detailed information about the system status, API keys, and uptime.
+    """
+    uptime = datetime.now() - START_TIME
+    uptime_seconds = int(uptime.total_seconds())
+
+    return {
+        "status": "healthy",
+        "version": APP_VERSION,
+        "timestamp": datetime.now().isoformat(),
+        "uptime_seconds": uptime_seconds,
+        "uptime_formatted": f"{uptime_seconds // 3600}h {(uptime_seconds % 3600) // 60}m {uptime_seconds % 60}s",
+        "model": GROQ_MODEL,
+        "api_keys": {
+            "groq": "configured" if GROQ_API_KEY else "missing",
+            "google_maps": "configured" if GOOGLE_MAPS_API_KEY else "missing"
+        },
+        "endpoints": {
+            "analyze": "/analyze",
+            "nearby_hospitals": "/nearby-hospitals",
+            "docs": "/docs",
+            "redoc": "/redoc"
+        }
+    }
 
 @app.post("/analyze")
-async def analyze(request: TriageRequest) -> TriageResponse:
+@limiter.limit("100/minute")
+async def analyze(request: TriageRequest, req: Request) -> TriageResponse:
     """Analyze symptoms and return triage priority."""
     
     # Classify condition for hospital matching
@@ -451,7 +505,8 @@ async def analyze(request: TriageRequest) -> TriageResponse:
 # =============================================================================
 
 @app.post("/nearby-hospitals", response_model=NearbyHospitalsResponse)
-async def nearby_hospitals(request: NearbyHospitalsRequest):
+@limiter.limit("100/minute")
+async def nearby_hospitals(request: NearbyHospitalsRequest, req: Request):
     """Find nearby hospitals with smart filtering and condition-based scoring."""
 
     # Validate coordinates
@@ -610,10 +665,12 @@ async def nearby_hospitals(request: NearbyHospitalsRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    print(f"\n{'='*50}")
-    print("AI Triage System Starting...")
+    print(f"\n{'='*60}")
+    print(f"🏥 {APP_NAME} v{APP_VERSION}")
+    print(f"{'='*60}")
     print(f"Model: {GROQ_MODEL}")
-    print(f"API Key: {'Set' if GROQ_API_KEY else 'NOT SET'}")
-    print(f"Google Maps Key: {'Set' if GOOGLE_MAPS_API_KEY else 'NOT SET'}")
-    print(f"{'='*50}\n")
+    print(f"Groq API Key: {'✓ Set' if GROQ_API_KEY else '✗ NOT SET'}")
+    print(f"Google Maps Key: {'✓ Set' if GOOGLE_MAPS_API_KEY else '✗ NOT SET'}")
+    print(f"Rate Limiting: 100 requests/minute per IP")
+    print(f"{'='*60}\n")
     uvicorn.run(app, host="127.0.0.1", port=8000)

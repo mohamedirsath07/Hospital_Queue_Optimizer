@@ -2,193 +2,99 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-green.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-purple.svg)
 
 **An AI-powered medical triage system for smart patient prioritization and hospital recommendations**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-documentation) • [Architecture](#-architecture)
+[Quick Start](#quick-start) • [Features](#features) • [Documentation](#documentation) • [Deployment](#deployment) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-## 🌟 Features
-
-### 🤖 AI-Powered Triage
-- **Intelligent Symptom Analysis**: Uses Llama 3.3 70B model via Groq API for accurate urgency classification
-- **4-Level Priority System**: Critical, Urgent, Semi-Urgent, and Non-Urgent classifications
-- **Safety-First Design**: Never provides diagnoses or medication recommendations
-
-### 🏥 Smart Hospital Finder
-- **Real-time Location Detection**: Finds hospitals within 5km radius
-- **Condition-Based Matching**: Recommends hospitals based on detected medical condition
-- **Smart Filtering**: Excludes diagnostic centers, labs, and pharmacies
-- **Direct Integration**: Navigate via Google Maps or call hospitals directly
-
-### 🛡️ Safety Features
-- **Input Validation**: Blocks requests for diagnoses or prescriptions
-- **Confidence Scoring**: Indicates reliability of each assessment
-- **Escalation Triggers**: Warns about symptoms to monitor
-- **Professional Disclaimer**: Always reminds users to seek professional care
-
----
-
-## 📁 Project Structure
-
-```
-Hospital_Queue_Optimizer/
-├── 📂 backend/
-│   └── 📂 app/
-│       ├── 📂 api/              # API route handlers
-│       │   ├── hospitals.py     # Hospital search endpoints
-│       │   └── triage.py        # Symptom analysis endpoints
-│       ├── 📂 core/             # Core configuration
-│       │   ├── config.py        # Environment settings
-│       │   ├── constants.py     # System constants
-│       │   └── safety.py        # Input safety filters
-│       ├── 📂 models/           # Data models
-│       │   └── schemas.py       # Pydantic schemas
-│       ├── 📂 services/         # Business logic
-│       │   ├── hospital_service.py
-│       │   └── triage_service.py
-│       └── main.py              # FastAPI application
-├── 📂 frontend/
-│   ├── index.html               # Main UI
-│   └── 📂 static/
-│       ├── 📂 css/
-│       └── 📂 js/
-├── 📂 docs/                     # Documentation
-├── 📂 scripts/                  # Utility scripts
-│   ├── start.bat                # Windows startup
-│   └── start.sh                 # Linux/Mac startup
-├── .env.example                 # Environment template
-├── .gitignore
-├── requirements.txt             # Python dependencies
-├── run.py                       # Application entry point
-└── README.md
-```
-
----
-
-## 🚀 Installation
+## 📋 Quick Start
 
 ### Prerequisites
-- Python 3.10 or higher
-- Groq API Key ([Get one here](https://console.groq.com))
-- Google Maps API Key ([Get one here](https://console.cloud.google.com))
 
-### Quick Start
+- Python 3.10+
+- Groq API key (free at https://console.groq.com/)
+- Google Maps API key (free at https://console.cloud.google.com/)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/mohamedirsath07/Hospital_Queue_Optimizer.git
-   cd Hospital_Queue_Optimizer
-   ```
+### Setup (2 minutes)
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv .venv
-   
-   # Windows
-   .venv\Scripts\activate
-   
-   # Linux/Mac
-   source .venv/bin/activate
-   ```
+```bash
+# Clone and setup
+git clone https://github.com/mohamedirsath07/Hospital_Queue_Optimizer.git
+cd Hospital_Queue_Optimizer
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Install and configure
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env and add your API keys
 
-4. **Configure environment**
-   ```bash
-   # Copy the example file
-   cp .env.example .env
-   
-   # Edit .env with your API keys
-   GROQ_API_KEY=your_groq_api_key
-   GOOGLE_MAPS_API_KEY=your_google_maps_key
-   ```
+# Run
+python main.py
+```
 
-5. **Run the application**
-   ```bash
-   python run.py
-   ```
-
-6. **Open in browser**
-   ```
-   http://127.0.0.1:8000
-   ```
+Then open: http://127.0.0.1:8000
 
 ---
 
-## 💻 Usage
+## ✨ Features
 
-### Web Interface
-1. Open the application in your browser
-2. Describe patient symptoms in detail
-3. Click "Analyze Symptoms"
-4. View triage priority and recommended actions
-5. Find nearby hospitals based on your condition
+### 🤖 AI-Powered Triage
+- **Intelligent Symptom Analysis**: Llama 3.3 70B model via Groq API
+- **4-Level Priority System**: Critical → Urgent → Semi-Urgent → Non-Urgent
+- **Safety-First**: Never diagnoses or prescribes medications
+- **Confidence Scoring**: Know the reliability of each assessment
 
-### Quick Test Scenarios
-The interface includes pre-built scenarios:
-- 🚨 **Critical**: Chest pain emergency
-- 🤒 **High Priority**: High fever for 2 days
-- 🤕 **Low Priority**: Minor headache
+### 🏥 Smart Hospital Finder
+- **Real-time Location Detection**: Finds hospitals within 5km
+- **Condition-Based Matching**: Recommends hospitals for your condition
+- **Smart Filtering**: Excludes diagnostic centers, labs, pharmacies
+- **Direct Integration**: Call hospitals or navigate via Google Maps
+
+### 🛡️ Safety Features
+- **Input Validation**: Blocks inappropriate requests
+- **Escalation Triggers**: Warns about symptoms to monitor
+- **Professional Disclaimer**: Always reminds users to seek professional care
+- **Rate Limiting**: 100 requests/minute per IP for fair access
 
 ---
 
-## 📚 API Documentation
+## 📚 Documentation
 
-### Interactive Docs
-- **Swagger UI**: http://127.0.0.1:8000/docs
-- **ReDoc**: http://127.0.0.1:8000/redoc
+| Document | Purpose |
+|----------|---------|
+| [**DEPLOYMENT.md**](DEPLOYMENT.md) | Deploy to Render, Vercel, or cloud platforms |
+| [**SETUP_GUIDE.md**](SETUP_GUIDE.md) | Local development setup & testing |
+| [**CONFIGURATION.md**](CONFIGURATION.md) | All environment variables & settings |
+| [**docs/API.md**](docs/API.md) | Complete API reference with examples |
 
-### Endpoints
+---
 
-#### `POST /api/v1/analyze`
-Analyze patient symptoms and return triage priority.
+## 🚀 Deployment
 
-**Request:**
-```json
-{
-  "symptoms": "Severe chest pain radiating to left arm, shortness of breath"
-}
-```
+### Quick Deployment
 
-**Response:**
-```json
-{
-  "priority": 1,
-  "priority_label": "CRITICAL",
-  "reason": "Chest pain with radiation and breathing difficulty",
-  "action": "Immediate cardiac evaluation required",
-  "queue": "critical-care",
-  "confidence": 0.95,
-  "escalation_triggers": ["Loss of consciousness", "Increasing pain"],
-  "condition_category": "CARDIAC"
-}
-```
+**Render (Recommended):**
+1. Push to GitHub
+2. Go to https://render.com
+3. Create Web Service from repository
+4. Set environment variables (GROQ_API_KEY, GOOGLE_MAPS_API_KEY)
+5. Deploy!
 
-#### `POST /api/v1/nearby-hospitals`
-Find nearby hospitals with condition-based matching.
+**Vercel:**
+1. Install Vercel CLI: `npm install -g vercel`
+2. Run: `vercel`
+3. Set environment variables in project settings
 
-**Request:**
-```json
-{
-  "lat": 13.0827,
-  "lng": 80.2707,
-  "symptoms": "chest pain"
-}
-```
-
-#### `GET /health`
-Health check endpoint.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
 ---
 
@@ -196,37 +102,147 @@ Health check endpoint.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Frontend (HTML/JS)                      │
-│                    Modern Dark Theme UI                      │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ HTTP/REST
-┌─────────────────────▼───────────────────────────────────────┐
-│                   FastAPI Backend                            │
+│                    Browser Frontend                          │
+│                  (HTML/CSS/JavaScript)                       │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ HTTP/REST
+┌──────────────────────────▼──────────────────────────────────┐
+│                    FastAPI Backend                           │
 ├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ Triage API  │  │Hospital API │  │   Safety Filter     │  │
-│  └──────┬──────┘  └──────┬──────┘  └─────────────────────┘  │
-│         │                │                                   │
-│  ┌──────▼──────┐  ┌──────▼──────┐                           │
-│  │   Triage    │  │  Hospital   │                           │
-│  │  Service    │  │  Service    │                           │
-│  └──────┬──────┘  └──────┬──────┘                           │
-└─────────┼────────────────┼──────────────────────────────────┘
-          │                │
-┌─────────▼────────┐ ┌─────▼─────────────┐
-│    Groq API      │ │ Google Places API │
-│  (Llama 3.3 70B) │ │  (Hospital Data)  │
-└──────────────────┘ └───────────────────┘
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐   │
+│  │ Triage API   │  │Hospital API  │  │ Rate Limiting   │   │
+│  │ (/analyze)   │  │(/hospitals)  │  │ (100 req/min)   │   │
+│  └──────┬───────┘  └──────┬───────┘  └─────────────────┘   │
+│         │                 │                                  │
+│  ┌──────▼──────┐  ┌──────▼──────┐                          │
+│  │   Groq API  │  │   Google    │                          │
+│  │(Llama 3.3)  │  │ Places API  │                          │
+│  └─────────────┘  └─────────────┘                          │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔒 Security & Safety
+## 📊 API Endpoints
+
+### Analyze Symptoms
+
+```bash
+POST /analyze
+{
+  "symptoms": "chest pain and shortness of breath"
+}
+```
+
+Returns: Priority level, reason, recommended action, escalation triggers
+
+### Find Nearby Hospitals
+
+```bash
+POST /nearby-hospitals
+{
+  "lat": 13.0827,
+  "lng": 80.2707,
+  "symptoms": "chest pain"
+}
+```
+
+Returns: Top 5 hospitals with distance, phone, match score
+
+### Health Check
+
+```bash
+GET /health
+```
+
+Returns: System status, version, uptime, API configuration
+
+---
+
+## 💻 Interactive API Docs
+
+Access these after running the application:
+
+- **Swagger UI:** http://127.0.0.1:8000/docs
+- **ReDoc:** http://127.0.0.1:8000/redoc
+
+---
+
+## 🔧 Configuration
+
+### Required Environment Variables
+
+```bash
+GROQ_API_KEY=gsk_your_key_here
+GOOGLE_MAPS_API_KEY=AIza_your_key_here
+```
+
+### Optional Variables
+
+```bash
+DEBUG=false                          # Debug mode
+HOSPITAL_SEARCH_RADIUS=5000         # Search radius in meters
+PORT=8000                           # Server port
+HOST=127.0.0.1                      # Server host
+```
+
+See [CONFIGURATION.md](CONFIGURATION.md) for complete reference.
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Install test dependencies
+pip install pytest pytest-asyncio
+
+# Run all tests
+pytest -v
+
+# Run with coverage
+pytest --cov=. tests/
+```
+
+### Manual Testing
+
+1. Open http://127.0.0.1:8000
+2. Use built-in test scenarios
+3. Check API docs at `/docs`
+
+---
+
+## 📁 Project Structure
+
+```
+Hospital_Queue_Optimizer/
+├── main.py                  # FastAPI application
+├── requirements.txt         # Dependencies
+├── .env.example            # Environment template
+├── vercel.json             # Vercel config
+│
+├── docs/
+│   └── API.md             # API documentation
+├── frontend/
+│   ├── index.html         # Web UI
+│   └── static/            # Assets
+│
+├── DEPLOYMENT.md          # Deployment guide
+├── SETUP_GUIDE.md         # Development setup
+├── CONFIGURATION.md       # Config reference
+└── README.md              # This file
+```
+
+---
+
+## 🔒 Security
 
 - ✅ No diagnosis or prescription recommendations
-- ✅ Input sanitization and validation
-- ✅ API key protection via environment variables
+- ✅ Input validation and sanitization
+- ✅ API keys protected via environment variables
 - ✅ CORS enabled for secure cross-origin requests
+- ✅ Rate limiting (100 requests/minute per IP)
 - ✅ Professional medical disclaimer on all responses
 
 ---
@@ -235,49 +251,133 @@ Health check endpoint.
 
 | Component | Technology |
 |-----------|------------|
-| Backend | FastAPI, Python 3.10+ |
-| AI Model | Llama 3.3 70B (via Groq) |
-| Frontend | HTML5, CSS3, JavaScript |
-| Maps | Google Places API |
-| HTTP Client | HTTPX |
-| Validation | Pydantic |
-
----
-
-## 📝 Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GROQ_API_KEY` | Groq API key for AI model | Yes |
-| `GOOGLE_MAPS_API_KEY` | Google Maps API key | Yes |
-| `DEBUG` | Enable debug mode | No |
+| **Backend** | FastAPI, Python 3.10+ |
+| **AI Model** | Llama 3.3 70B (via Groq) |
+| **Frontend** | HTML5, CSS3, JavaScript |
+| **Maps** | Google Places API |
+| **HTTP Client** | HTTPX (async) |
+| **Validation** | Pydantic |
+| **Rate Limiting** | SlowAPI |
+| **Deployment** | Render, Vercel |
 
 ---
 
 ## 🤝 Contributing
 
+Contributions are welcome! See [SETUP_GUIDE.md](SETUP_GUIDE.md) for development setup.
+
+### Process
+
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'feat: add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
+
+### Code Standards
+
+- Follow PEP 8
+- Add type hints to all functions
+- Include docstrings
+- Write tests for new features
+- Update documentation
+
+---
+
+## 📈 API Usage Examples
+
+### Python
+
+```python
+import httpx
+import asyncio
+
+async def triage(symptoms):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://127.0.0.1:8000/analyze",
+            json={"symptoms": symptoms}
+        )
+        return response.json()
+
+# Run
+result = asyncio.run(triage("chest pain"))
+print(f"Priority: {result['priority_label']}")
+```
+
+### JavaScript
+
+```javascript
+async function triage(symptoms) {
+    const response = await fetch('http://127.0.0.1:8000/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({symptoms})
+    });
+    return await response.json();
+}
+
+triage('chest pain').then(result => {
+    console.log(`Priority: ${result.priority_label}`);
+});
+```
+
+### cURL
+
+```bash
+curl -X POST http://127.0.0.1:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"symptoms":"chest pain"}'
+```
+
+---
+
+## ⚠️ Medical Disclaimer
+
+This system is designed as a **decision support tool** for medical triage. It is **NOT**:
+
+- A replacement for professional medical advice
+- A diagnostic tool
+- A prescribing system
+- Licensed for clinical use
+
+Always consult qualified healthcare professionals for medical decisions.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## ⚠️ Disclaimer
+## 📞 Support
 
-This system is designed as a **decision support tool** for medical triage. It is **NOT** a replacement for professional medical advice, diagnosis, or treatment. Always consult qualified healthcare professionals for medical decisions.
+Having issues? Check the docs:
+
+- **Deployment Issues?** See [DEPLOYMENT.md](DEPLOYMENT.md)
+- **Setup Help?** See [SETUP_GUIDE.md](SETUP_GUIDE.md)
+- **Configuration?** See [CONFIGURATION.md](CONFIGURATION.md)
+- **API Questions?** See [docs/API.md](docs/API.md)
+
+---
+
+## 🎯 Roadmap
+
+- [ ] User authentication & session management
+- [ ] Patient history tracking
+- [ ] Integration with EHR systems
+- [ ] Multi-language support
+- [ ] Mobile app (React Native)
+- [ ] Analytics dashboard
+- [ ] WebSocket real-time updates
 
 ---
 
 <div align="center">
 
 **Built with ❤️ for better healthcare**
+
+*Version 1.1.0 • Last Updated April 2026*
 
 </div>
