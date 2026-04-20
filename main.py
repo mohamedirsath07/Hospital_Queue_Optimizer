@@ -325,14 +325,9 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://hospital-queue-optimizer-xi.vercel.app",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "*"
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
