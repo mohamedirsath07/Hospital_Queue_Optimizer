@@ -1189,7 +1189,7 @@
     animateSteps();
 
     try {
-      const res = await fetch(`${BACKEND_URL}/triage`, {
+      const res = await fetch(`${BACKEND_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symptoms })
@@ -1336,7 +1336,11 @@
     grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:1rem;">Searching nearby hospitals...</div>';
 
     try {
-      const res = await fetch(`${BACKEND_URL}/hospitals?lat=${lat}&lng=${lng}&condition=${conditionType}`);
+      const res = await fetch(`${BACKEND_URL}/api/v1/nearby-hospitals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude: lat, longitude: lng, condition: conditionType })
+      });
       if (!res.ok) throw new Error('Hospital fetch failed');
       const hospitals = await res.json();
       renderHospitals(hospitals, conditionType);
@@ -1397,7 +1401,11 @@
     grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:1rem;">Searching...</div>';
 
     try {
-      const res = await fetch(`${BACKEND_URL}/hospitals?location=${encodeURIComponent(loc)}&condition=general`);
+      const res = await fetch(`${BACKEND_URL}/api/v1/nearby-hospitals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location: loc, condition: 'general' })
+      });
       if (!res.ok) throw new Error('failed');
       const hospitals = await res.json();
       renderHospitals(hospitals, 'general');
