@@ -27,20 +27,26 @@ def create_app() -> FastAPI:
         redoc_url="/redoc"
     )
     
-    # CORS middleware - restrict to specific origins for security
+    # CORS middleware configuration
+    # Allow both localhost (development) and production origins
     allowed_origins = [
         "http://localhost:8000",
+        "http://localhost:3000",
         "http://127.0.0.1:8000",
+        "http://127.0.0.1:3000",
         "https://hospital-queue-optimizer.onrender.com",
         "https://hospital-queue-optimizer-xi.vercel.app",
+        "https://vercel.app",  # Allow any Vercel deployment
     ]
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
-        allow_credentials=False,  # Only allow credentials when absolutely necessary
-        allow_methods=["GET", "POST", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"],
+        allow_credentials=False,
+        allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
+        allow_headers=["*"],  # Allow all headers for development
+        expose_headers=["*"],
+        max_age=600,  # Cache preflight for 10 minutes
     )
     
     # Include routers
