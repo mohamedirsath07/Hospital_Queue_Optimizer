@@ -1,3 +1,0 @@
-# Trigger file - Forces Render to redeploy
-# Created: 2026-04-20
-REDEPLOY_TRIGGER=true
