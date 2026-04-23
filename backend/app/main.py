@@ -78,14 +78,15 @@ def create_app() -> FastAPI:
     @app.get("/")
     async def root():
         """Serve the frontend application."""
-        frontend_path = Path(__file__).parent.parent.parent / "frontend" / "index.html"
-        if frontend_path.exists():
-            return FileResponse(frontend_path)
-        
-        # Fallback to root index.html
+        # Try root index.html first (primary frontend)
         root_index = Path(__file__).parent.parent.parent / "index.html"
         if root_index.exists():
             return FileResponse(root_index)
+        
+        # Fallback to frontend/index.html
+        frontend_path = Path(__file__).parent.parent.parent / "frontend" / "index.html"
+        if frontend_path.exists():
+            return FileResponse(frontend_path)
             
         return {
             "message": settings.APP_NAME,

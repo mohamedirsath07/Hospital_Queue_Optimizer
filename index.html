@@ -1147,7 +1147,10 @@
 
 <script>
   // ── Config ──────────────────────────────────────────────────────
-  const BACKEND_URL = 'https://hospital-queue-optimizer.onrender.com';
+  // Use local backend in development, remote in production
+  const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? window.location.origin
+    : 'https://hospital-queue-optimizer-onrender.com';
 
   // ── State ────────────────────────────────────────────────────────
   let startTime = null;
