@@ -168,8 +168,8 @@ async def find_nearby_hospitals(request: NearbyHospitalsRequest) -> NearbyHospit
     logger.info(f"Finding hospitals - Lat: {lat}, Lng: {lng}, Condition: {condition}")
 
     # Check if Google Maps API key is configured
-    if not settings.GOOGLE_MAPS_API_KEY:
-        logger.warning("Google Maps API key not configured - returning mock hospitals")
+    if not settings.GOOGLE_MAPS_API_KEY or "your_" in settings.GOOGLE_MAPS_API_KEY:
+        logger.warning("Google Maps API key not configured or is placeholder - returning mock hospitals")
         return NearbyHospitalsResponse(
             success=True,
             hospitals=_get_mock_hospitals(lat, lng, condition),
@@ -194,6 +194,17 @@ async def find_nearby_hospitals(request: NearbyHospitalsRequest) -> NearbyHospit
             if data.get("status") != "OK":
                 error_msg = data.get("error_message", data.get("status", "Unknown error"))
                 logger.warning(f"Google Places API error: {error_msg}")
+                
+                # If it's an invalid API key error, return mock hospitals for demo purposes
+                if "invalid" in error_msg.lower() or "forbidden" in error_msg.lower():
+                    logger.info("Invalid API key detected - falling back to mock hospitals")
+                    return NearbyHospitalsResponse(
+                        success=True,
+                        hospitals=_get_mock_hospitals(lat, lng, condition),
+                        condition_category=condition,
+                        safety_message="Using demo hospital data. Configure Google Maps API for real location data."
+                    )
+                
                 return NearbyHospitalsResponse(
                     success=False,
                     hospitals=[],
