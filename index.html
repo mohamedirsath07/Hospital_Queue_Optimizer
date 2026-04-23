@@ -1383,7 +1383,9 @@
         body: JSON.stringify({ latitude: lat, longitude: lng, condition: conditionType })
       });
       if (!res.ok) throw new Error('Hospital fetch failed');
-      const hospitals = await res.json();
+      const data = await res.json();
+      // Extract hospitals array from response
+      const hospitals = data.hospitals || [];
       renderHospitals(hospitals, conditionType);
     } catch (err) {
       grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:1rem;">Could not load hospitals. Try manual search below.</div>';
@@ -1448,7 +1450,9 @@
         body: JSON.stringify({ location: loc, condition: 'general' })
       });
       if (!res.ok) throw new Error('failed');
-      const hospitals = await res.json();
+      const data = await res.json();
+      // Extract hospitals array from response
+      const hospitals = data.hospitals || [];
       renderHospitals(hospitals, 'general');
     } catch {
       grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:1rem;">Search failed. Please try again.</div>';
